@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext'
 const TITLES: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Dashboard', subtitle: 'Pipeline health and lead quality at a glance' },
   '/leads': { title: 'Leads', subtitle: 'Search, filter, qualify and export your leads' },
+  '/ask': { title: 'Ask Your Leads', subtitle: 'Chat with your lead data using a local AI model' },
   '/import': { title: 'Import Data', subtitle: 'Upload a CSV, review, then save clean records' },
   '/settings': { title: 'Settings', subtitle: 'Scoring criteria and data quality rules' },
 }

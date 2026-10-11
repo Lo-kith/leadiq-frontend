@@ -9,6 +9,7 @@ import type {
   LeadQuery,
   ScoringConfig,
 } from '@/types/lead'
+import type { AskRequest, AskResponse, AskStatus } from '@/types/ask'
 
 function toQueryString(query: LeadQuery): string {
   const params = new URLSearchParams()
@@ -81,6 +82,16 @@ export const apiService: DataService = {
 
   async rescoreAll() {
     const response = await http<{ data: { updated: number } }>('/leads/rescore', { method: 'POST' })
+    return response.data
+  },
+
+  async askLeads(input: AskRequest) {
+    const response = await http<{ data: AskResponse }>('/ask', { method: 'POST', body: input })
+    return response.data
+  },
+
+  async getAskStatus() {
+    const response = await http<{ data: AskStatus }>('/ask/status')
     return response.data
   },
 }

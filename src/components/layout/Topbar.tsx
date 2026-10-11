@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { BarChart3, LayoutDashboard, Search, Settings, Target, Upload, UserRound } from 'lucide-react'
+import { BarChart3, LayoutDashboard, Search, Settings, Sparkles, Target, Upload, UserRound } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 const MOBILE_NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/leads', label: 'Leads', icon: Target, end: false },
+  { to: '/ask', label: 'Ask', icon: Sparkles, end: false },
   { to: '/import', label: 'Import', icon: Upload, end: false },
   { to: '/settings', label: 'Settings', icon: Settings, end: false },
 ]

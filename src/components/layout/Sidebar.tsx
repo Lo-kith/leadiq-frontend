@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { BarChart3, Database, LayoutDashboard, Settings, Target, Upload } from 'lucide-react'
+import { BarChart3, Database, LayoutDashboard, Settings, Sparkles, Target, Upload } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import type { DataMode } from '@/config/env'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/leads', label: 'Leads', icon: Target, end: false },
+  { to: '/ask', label: 'Ask Your Leads', icon: Sparkles, end: false },
   { to: '/import', label: 'Import Data', icon: Upload, end: false },
   { to: '/settings', label: 'Settings', icon: Settings, end: false },
 ]

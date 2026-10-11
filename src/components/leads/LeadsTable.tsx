@@ -171,10 +171,11 @@ export function LeadsTable({
               </td>
               <td className="px-4 py-3 text-right text-mist-200">{formatCurrency(lead.revenue)}</td>
               <td className="px-4 py-3">
-                {lead.contactName || lead.email ? (
+                {lead.contactName || lead.email || lead.jobTitle ? (
                   <div>
                     <p className="text-mist-200">{lead.contactName ?? '—'}</p>
-                    <p className="truncate text-xs text-mist-500">{lead.email ?? 'No email'}</p>
+                    <p className="truncate text-xs text-mist-500">{lead.jobTitle ?? (lead.email ?? 'No email')}</p>
+                    {lead.jobTitle && lead.email && <p className="truncate text-xs text-mist-500">{lead.email}</p>}
                   </div>
                 ) : (
                   <span className="text-xs text-mist-500">No contact</span>

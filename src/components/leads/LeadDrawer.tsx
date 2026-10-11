@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   AlertCircle,
   CheckCircle2,
@@ -34,6 +35,7 @@ interface FormState {
   employeeCount: string
   revenue: string
   contactName: string
+  jobTitle: string
   email: string
   linkedinUrl: string
   leadSource: string
@@ -51,6 +53,7 @@ function toForm(lead: Lead): FormState {
     employeeCount: lead.employeeCount !== null ? String(lead.employeeCount) : '',
     revenue: lead.revenue !== null ? String(lead.revenue) : '',
     contactName: lead.contactName ?? '',
+    jobTitle: lead.jobTitle ?? '',
     email: lead.email ?? '',
     linkedinUrl: lead.linkedinUrl ?? '',
     leadSource: lead.leadSource ?? '',
@@ -68,6 +71,7 @@ function FactorIcon({ kind }: { kind: 'positive' | 'negative' | 'neutral' }) {
 
 export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDrawerProps) {
   const toast = useToast()
+  const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -102,6 +106,7 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
         employeeCount: form.employeeCount.trim() === '' ? null : Number(form.employeeCount),
         revenue: form.revenue.trim() === '' ? null : Number(form.revenue),
         contactName: form.contactName.trim() || null,
+        jobTitle: form.jobTitle.trim() || null,
         email: form.email.trim() || null,
         linkedinUrl: form.linkedinUrl.trim() || null,
         leadSource: form.leadSource.trim() || null,
@@ -155,9 +160,20 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
             <Button variant="danger" size="sm" icon={<Trash2 className="h-4 w-4" />} onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Deleting…' : 'Delete'}
             </Button>
-            <Button variant="primary" icon={<Pencil className="h-4 w-4" />} onClick={() => setEditing(true)}>
-              Edit lead
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                icon={<Sparkles className="h-4 w-4" />}
+                onClick={() =>
+                  navigate(`/ask?leadId=${encodeURIComponent(lead.id)}&company=${encodeURIComponent(lead.companyName)}`)
+                }
+              >
+                Ask AI
+              </Button>
+              <Button variant="primary" icon={<Pencil className="h-4 w-4" />} onClick={() => setEditing(true)}>
+                Edit lead
+              </Button>
+            </div>
           </div>
         )
       }
@@ -200,6 +216,7 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
               <Detail label="Revenue" value={lead.revenue !== null ? formatCurrency(lead.revenue) : null} />
               <Detail label="Lead source" value={lead.leadSource} />
               <Detail label="Contact" value={lead.contactName} />
+              <Detail label="Job title" value={lead.jobTitle} />
               <Detail label="Email" value={lead.email} />
               <Detail label="LinkedIn" value={lead.linkedinUrl} link={lead.linkedinUrl} />
             </dl>
@@ -307,6 +324,9 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
             </Field>
             <Field label="Contact name" htmlFor="contactName">
               <Input id="contactName" value={form.contactName} onChange={(event) => patch({ contactName: event.target.value })} />
+            </Field>
+            <Field label="Job title" htmlFor="jobTitle">
+              <Input id="jobTitle" value={form.jobTitle} onChange={(event) => patch({ jobTitle: event.target.value })} />
             </Field>
             <Field label="Email" htmlFor="email">
               <Input id="email" type="email" value={form.email} onChange={(event) => patch({ email: event.target.value })} />

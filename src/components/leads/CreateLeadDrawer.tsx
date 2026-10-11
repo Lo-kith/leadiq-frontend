@@ -20,6 +20,7 @@ const EMPTY = {
   employeeCount: '',
   revenue: '',
   contactName: '',
+  jobTitle: '',
   email: '',
   linkedinUrl: '',
   leadSource: '',
@@ -57,6 +58,7 @@ export function CreateLeadDrawer({ open, onClose, onCreated }: CreateLeadDrawerP
         employeeCount: form.employeeCount.trim() === '' ? null : Number(form.employeeCount),
         revenue: form.revenue.trim() === '' ? null : Number(form.revenue),
         contactName: form.contactName.trim() || null,
+        jobTitle: form.jobTitle.trim() || null,
         email: form.email.trim() || null,
         linkedinUrl: form.linkedinUrl.trim() || null,
         leadSource: form.leadSource.trim() || null,
@@ -116,6 +118,9 @@ export function CreateLeadDrawer({ open, onClose, onCreated }: CreateLeadDrawerP
           </Field>
           <Field label="Contact name" htmlFor="new-contact">
             <Input id="new-contact" value={form.contactName} onChange={(e) => patch({ contactName: e.target.value })} />
+          </Field>
+          <Field label="Job title" htmlFor="new-jobtitle">
+            <Input id="new-jobtitle" value={form.jobTitle} onChange={(e) => patch({ jobTitle: e.target.value })} />
           </Field>
           <Field label="Email" htmlFor="new-email">
             <Input id="new-email" type="email" value={form.email} onChange={(e) => patch({ email: e.target.value })} />

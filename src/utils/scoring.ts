@@ -15,10 +15,11 @@ export const DEFAULT_SCORING_CONFIG: ScoringConfig = {
   minRevenue: 1_000_000,
   weights: {
     industry: 25,
-    companySize: 20,
-    revenue: 15,
-    website: 10,
+    companySize: 15,
+    revenue: 10,
+    website: 5,
     contact: 15,
+    persona: 15,
     completeness: 15,
   },
   priorityThresholds: { high: 70, medium: 45 },
@@ -32,6 +33,7 @@ export interface ScorableLead {
   employeeCount?: number | null
   revenue?: number | null
   contactName?: string | null
+  jobTitle?: string | null
   email?: string | null
   linkedinUrl?: string | null
   leadSource?: string | null
@@ -46,6 +48,7 @@ const COMPLETENESS_FIELDS: Array<keyof ScorableLead> = [
   'employeeCount',
   'revenue',
   'contactName',
+  'jobTitle',
   'email',
   'linkedinUrl',
   'leadSource',
@@ -68,6 +71,19 @@ export function computeCompleteness(lead: ScorableLead): number {
   return Math.round((present / COMPLETENESS_FIELDS.length) * 100)
 }
 
+const DECISION_MAKER_REGEX = /(?:ceo|cto|cfo|coo|cmo|chief|founder|owner|president|vp|vice president|head of|director|partner)/i
+
+function personaPoints(jobTitle: string | null | undefined, weight: number): { points: number; detail: string } {
+  if (!jobTitle || !String(jobTitle).trim()) {
+    return { points: 0, detail: 'Job title missing' }
+  }
+  const title = String(jobTitle).trim()
+  if (DECISION_MAKER_REGEX.test(title)) {
+    return { points: weight, detail: `Decision-maker role (${title})` }
+  }
+  return { points: Math.round(weight * 0.4), detail: `Non-decision-maker role (${title})` }
+}
+
 export function computeScore(
   lead: ScorableLead,
   config: ScoringConfig = DEFAULT_SCORING_CONFIG,
@@ -76,35 +92,42 @@ export function computeScore(
   const missing: string[] = []
   const reasons: string[] = []
   const w = config.weights
-  let earned = 0
+
+  let fitEarned = 0
+  let fitPossible = 0
+  let qualityEarned = 0
 
   if (!hasValue(lead.industry)) {
-    missing.push('Industry not provided — treated as unknown, not penalized.')
-  } else if (industryMatches(String(lead.industry), config.targetIndustries)) {
-    earned += w.industry
-    factors.push({
-      label: `Target industry: ${lead.industry}`,
-      points: w.industry,
-      detail: 'Matches one of your configured target industries.',
-      kind: 'positive',
-    })
-    reasons.push(`Industry "${lead.industry}" is a target industry (+${w.industry}).`)
+    missing.push('Industry not provided — treated as unknown for fit.')
   } else {
-    factors.push({
-      label: `Outside target industries: ${lead.industry}`,
-      points: 0,
-      detail: 'Industry is known but is not in the target list.',
-      kind: 'neutral',
-    })
-    reasons.push(`Industry "${lead.industry}" is outside your target list (0 points).`)
+    fitPossible += w.industry
+    if (industryMatches(String(lead.industry), config.targetIndustries)) {
+      fitEarned += w.industry
+      factors.push({
+        label: `Target industry: ${lead.industry}`,
+        points: w.industry,
+        detail: 'Matches one of your configured target industries.',
+        kind: 'positive',
+      })
+      reasons.push(`Industry "${lead.industry}" is a target industry (+${w.industry}).`)
+    } else {
+      factors.push({
+        label: `Outside target industries: ${lead.industry}`,
+        points: 0,
+        detail: 'Industry is known but is not in the target list.',
+        kind: 'neutral',
+      })
+      reasons.push(`Industry "${lead.industry}" is outside your target list (0 points).`)
+    }
   }
 
   if (!hasValue(lead.employeeCount)) {
     missing.push('Employee count unknown.')
   } else {
     const count = Number(lead.employeeCount)
+    fitPossible += w.companySize
     if (count >= config.minEmployees && count <= config.maxEmployees) {
-      earned += w.companySize
+      fitEarned += w.companySize
       factors.push({
         label: `Company size ${count} employees`,
         points: w.companySize,
@@ -114,7 +137,7 @@ export function computeScore(
       reasons.push(`Employee count ${count} is within target range (+${w.companySize}).`)
     } else if (count < config.minEmployees) {
       const points = Math.round(w.companySize * Math.min(Math.max(0, count / config.minEmployees), 1) * 0.5)
-      earned += points
+      fitEarned += points
       factors.push({
         label: `Company size ${count} employees`,
         points,
@@ -124,7 +147,7 @@ export function computeScore(
       reasons.push(`Employee count ${count} is below target range (+${points}).`)
     } else {
       const points = Math.round(w.companySize * 0.5)
-      earned += points
+      fitEarned += points
       factors.push({
         label: `Company size ${count} employees`,
         points,
@@ -139,8 +162,9 @@ export function computeScore(
     missing.push('Revenue unknown.')
   } else {
     const revenue = Number(lead.revenue)
+    fitPossible += w.revenue
     if (revenue >= config.minRevenue) {
-      earned += w.revenue
+      fitEarned += w.revenue
       factors.push({
         label: 'Revenue meets threshold',
         points: w.revenue,
@@ -150,7 +174,7 @@ export function computeScore(
       reasons.push(`Revenue meets the minimum threshold (+${w.revenue}).`)
     } else {
       const points = Math.round(w.revenue * Math.min(Math.max(0, revenue / config.minRevenue), 1) * 0.5)
-      earned += points
+      fitEarned += points
       factors.push({
         label: 'Revenue below threshold',
         points,
@@ -162,7 +186,7 @@ export function computeScore(
   }
 
   if (hasValue(lead.website)) {
-    earned += w.website
+    qualityEarned += w.website
     factors.push({
       label: 'Website available',
       points: w.website,
@@ -175,7 +199,7 @@ export function computeScore(
 
   if (hasValue(lead.email) || hasValue(lead.contactName)) {
     const points = hasValue(lead.email) && hasValue(lead.contactName) ? w.contact : Math.round(w.contact * 0.6)
-    earned += points
+    qualityEarned += points
     factors.push({
       label: 'Contact information available',
       points,
@@ -187,15 +211,48 @@ export function computeScore(
     missing.push('No contact name or email.')
   }
 
+  if (!hasValue(lead.jobTitle)) {
+    missing.push('Job title missing.')
+    const p = personaPoints(lead.jobTitle, w.persona)
+    factors.push({
+      label: 'Decision-maker persona',
+      points: p.points,
+      detail: p.detail,
+      kind: 'neutral',
+    })
+  } else {
+    const p = personaPoints(lead.jobTitle, w.persona)
+    qualityEarned += p.points
+    factors.push({
+      label: 'Decision-maker persona',
+      points: p.points,
+      detail: p.detail,
+      kind: p.points >= w.persona ? 'positive' : p.points > 0 ? 'neutral' : 'neutral',
+    })
+  }
+
   const completeness = computeCompleteness(lead)
   const completenessPoints = Math.round(w.completeness * (completeness / 100))
-  earned += completenessPoints
+  qualityEarned += completenessPoints
   factors.push({
     label: `Data completeness ${completeness}%`,
     points: completenessPoints,
     detail: `${COMPLETENESS_FIELDS.filter((f) => hasValue(lead[f])).length} of ${COMPLETENESS_FIELDS.length} key fields present.`,
     kind: completenessPoints >= w.completeness * 0.5 ? 'positive' : 'neutral',
   })
+
+  const fitRatio = fitPossible > 0 ? fitEarned / fitPossible : 0.5
+  const multiplier = 0.3 + 0.7 * fitRatio
+  let earned = fitEarned + qualityEarned * multiplier
+  if (multiplier < 1) {
+    factors.push({
+      label: 'Fit-based quality scaling',
+      points: 0,
+      detail: `Quality points scaled by fit ratio (${fitRatio.toFixed(2)}) due to incomplete fit data.`,
+      kind: 'neutral',
+    })
+    reasons.push(`Quality scaled by fit ratio ${fitRatio.toFixed(2)} (multiplier ${(multiplier).toFixed(2)}).`)
+  }
 
   const score = Math.max(0, Math.min(100, Math.round(earned)))
   const priority: LeadPriority =

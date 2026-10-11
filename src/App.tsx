@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { LeadsPage } from '@/pages/LeadsPage'
 import { ImportPage } from '@/pages/ImportPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { AskPage } from '@/pages/AskPage'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="leads" element={<LeadsPage />} />
+              <Route path="ask" element={<AskPage />} />
               <Route path="import" element={<ImportPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

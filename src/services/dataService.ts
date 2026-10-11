@@ -22,6 +22,8 @@ export const service: DataService = {
   getSettings: () => current.getSettings(),
   updateSettings: (config) => current.updateSettings(config),
   rescoreAll: () => current.rescoreAll(),
+  askLeads: (input) => current.askLeads(input),
+  getAskStatus: () => current.getAskStatus(),
 }
 
 export async function initDataService(): Promise<'api' | 'local'> {

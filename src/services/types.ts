@@ -7,6 +7,7 @@ import type {
   LeadQuery,
   ScoringConfig,
 } from '@/types/lead'
+import type { AskRequest, AskResponse, AskStatus } from '@/types/ask'
 
 export interface ImportOptions {
   commit: boolean
@@ -26,4 +27,6 @@ export interface DataService {
   getSettings(): Promise<{ scoringConfig: ScoringConfig }>
   updateSettings(config: ScoringConfig): Promise<{ scoringConfig: ScoringConfig }>
   rescoreAll(): Promise<{ updated: number }>
+  askLeads(input: AskRequest): Promise<AskResponse>
+  getAskStatus(): Promise<AskStatus>
 }

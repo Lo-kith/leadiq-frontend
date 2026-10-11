@@ -28,6 +28,7 @@ export interface Lead {
   employeeCount: number | null
   revenue: number | null
   contactName: string | null
+  jobTitle: string | null
   email: string | null
   linkedinUrl: string | null
   leadSource: string | null
@@ -50,6 +51,7 @@ export interface LeadInput {
   employeeCount?: number | null
   revenue?: number | null
   contactName?: string | null
+  jobTitle?: string | null
   email?: string | null
   linkedinUrl?: string | null
   leadSource?: string | null
@@ -98,6 +100,7 @@ export interface ScoringConfig {
     revenue: number
     website: number
     contact: number
+    persona: number
     completeness: number
   }
   priorityThresholds: {

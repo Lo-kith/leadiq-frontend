@@ -266,4 +266,20 @@ export const localService: DataService = {
     saveLeads(leads)
     return { updated: leads.length }
   },
+
+  async askLeads() {
+    throw new Error(
+      'Ask Your Leads requires the backend API and a running Ollama model. It is not available in local demo mode.',
+    )
+  },
+
+  async getAskStatus() {
+    return {
+      provider: 'ollama',
+      url: '',
+      model: '',
+      available: false,
+      modelAvailable: false,
+    }
+  },
 }

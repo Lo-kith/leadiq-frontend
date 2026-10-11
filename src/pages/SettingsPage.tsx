@@ -15,6 +15,7 @@ const WEIGHT_FIELDS: Array<{ key: keyof ScoringConfig['weights']; label: string 
   { key: 'revenue', label: 'Revenue threshold' },
   { key: 'website', label: 'Website present' },
   { key: 'contact', label: 'Contact info' },
+  { key: 'persona', label: 'Decision-maker persona' },
   { key: 'completeness', label: 'Data completeness' },
 ]
 
