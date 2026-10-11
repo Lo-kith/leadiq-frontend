@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Download, Plus, Trash2, UserCheck, X } from 'lucide-react'
+import { Download, Plus, Trash2, UserCheck, X, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States'
@@ -129,6 +129,18 @@ export function LeadsPage() {
       refetch()
     } catch (err) {
       toast.push(err instanceof Error ? err.message : 'Bulk update failed', 'error')
+    }
+  }
+
+  const handleBulkEnrich = async () => {
+    if (selected.size === 0) return
+    try {
+      await service.enrichLeads([...selected])
+      toast.push(`Enriched ${selected.size} lead(s).`, 'success')
+      setSelected(new Set())
+      refetch()
+    } catch (err) {
+      toast.push(err instanceof Error ? err.message : 'Bulk enrich failed', 'error')
     }
   }
 
