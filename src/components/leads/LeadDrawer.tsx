@@ -8,6 +8,8 @@ import {
   Pencil,
   Sparkles,
   Trash2,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/Drawer'
 import { Button } from '@/components/ui/Button'
@@ -161,6 +163,7 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
               {deleting ? 'Deleting…' : 'Delete'}
             </Button>
             <div className="flex items-center gap-2">
+              <EnrichButton lead={lead} onUpdated={onSaved} />
               <Button
                 variant="secondary"
                 icon={<Sparkles className="h-4 w-4" />}
@@ -277,13 +280,14 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
             </section>
           )}
 
-          <p className="rounded-lg border border-ink-700 bg-ink-900/60 p-3 text-xs text-mist-500">
-            Scores are estimates based on the data on file (deterministic, rule-based). They are not a
-            guarantee of buying intent or conversion.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
+            <EnrichmentSection lead={lead} />
+            <p className="rounded-lg border border-ink-700 bg-ink-900/60 p-3 text-xs text-mist-500">
+              Scores are estimates based on the data on file (deterministic, rule-based). They are not a
+              guarantee of buying intent or conversion.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
           <Field label="Company name" htmlFor="companyName">
             <Input
               id="companyName"
@@ -361,6 +365,51 @@ export function LeadDrawer({ lead, open, onClose, onSaved, onDeleted }: LeadDraw
     </Drawer>
   )
 }
+
+function EnrichButton({ lead, onUpdated }: { lead: Lead; onUpdated: (lead: Lead) => void }) {
+  const toast = useToast()
+  const [loading, setLoading] = useState(false)
+  return (
+    <Button variant="secondary" icon={<Zap className="h-4 w-4" />} loading={loading} onClick={async () => {
+      setLoading(true)
+      try {
+        const updated = await service.enrichLead(lead.id)
+        onUpdated(updated)
+        toast.push("Enrichment completed.", "success")
+      } catch (e) {
+        toast.push(e instanceof Error ? e.message : "Enrichment failed", "error")
+      } finally {
+        setLoading(false)
+      }
+    }}>Enrich</Button>
+  )
+}
+
+function EnrichmentSection({ lead }: { lead: Lead }) {
+  const e: any = (lead as any).enrichment
+  if (!e) return null
+  const verified = e.mxValid && e.websiteStatus === 200
+  return (
+    <section>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">Enrichment</h3>
+      <div className="space-y-2 rounded-lg border border-ink-700 bg-ink-900 p-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-mist-200">MX: {e.mxValid === null ? "Unknown" : e.mxValid ? "Valid" : "Invalid"}</span>
+          <span className="text-mist-200">Site: {e.websiteStatus ?? "Unknown"}</span>
+          {verified && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/15 px-2 py-0.5 text-xs font-medium text-accent-400">
+              <ShieldCheck className="h-3 w-3" /> Verified
+            </span>
+          )}
+        </div>
+        {e.siteTitle && <p className="text-mist-100">Title: {e.siteTitle}</p>}
+        {e.siteDescription && <p className="text-mist-400">Description: {e.siteDescription}</p>}
+        <p className="text-xs text-mist-500">Checked {e.checkedAt ? new Date(e.checkedAt).toLocaleString() : ""}</p>
+      </div>
+    </section>
+  )
+}
+
 
 function Detail({ label, value, link }: { label: string; value: string | null; link?: string | null }) {
   return (

@@ -160,7 +160,15 @@ export function LeadsTable({
                     {initials(lead.companyName)}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-mist-100">{lead.companyName}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onOpen(lead)
+                      }}
+                      className="truncate font-medium text-mist-100 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 rounded"
+                    >
+                      {lead.companyName}
+                    </button>
                     <p className="truncate text-xs text-mist-500">{lead.location ?? 'Location unknown'}</p>
                   </div>
                 </div>

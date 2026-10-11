@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 const baseControl =
@@ -38,10 +39,18 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return <textarea className={cn(baseControl, 'min-h-20 resize-y', className)} {...props} />
 }
 
-export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({
+  className,
+  children,
+  wrapperClassName,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement> & { wrapperClassName?: string }) {
   return (
-    <select className={cn(baseControl, 'appearance-none pr-8', className)} {...props}>
-      {children}
-    </select>
+    <div className={cn('relative', wrapperClassName)}>
+      <select className={cn(baseControl, 'appearance-none pr-8', className)} {...props}>
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-mist-400" />
+    </div>
   )
 }

@@ -195,6 +195,9 @@ export function LeadsPage() {
                 ))}
               </Select>
             </div>
+            <Button size="sm" variant="secondary" icon={<Zap className="h-3.5 w-3.5" />} onClick={handleBulkEnrich}>
+              Enrich selected
+            </Button>
             <Button size="sm" variant="secondary" icon={<Download className="h-3.5 w-3.5" />} onClick={handleExportSelected}>
               Export selected
             </Button>

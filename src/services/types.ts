@@ -29,4 +29,6 @@ export interface DataService {
   rescoreAll(): Promise<{ updated: number }>
   askLeads(input: AskRequest): Promise<AskResponse>
   getAskStatus(): Promise<AskStatus>
+  enrichLead(id: string): Promise<Lead>
+  enrichLeads(ids: string[]): Promise<Lead[]>
 }

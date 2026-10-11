@@ -282,4 +282,12 @@ export const localService: DataService = {
       modelAvailable: false,
     }
   },
+
+  async enrichLead(): Promise<import('@/types/lead').Lead> {
+    throw new Error('Enrichment requires the backend API.')
+  },
+
+  async enrichLeads(): Promise<import('@/types/lead').Lead[]> {
+    throw new Error('Enrichment requires the backend API.')
+  },
 }

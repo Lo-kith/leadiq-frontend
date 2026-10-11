@@ -24,6 +24,8 @@ export const service: DataService = {
   rescoreAll: () => current.rescoreAll(),
   askLeads: (input) => current.askLeads(input),
   getAskStatus: () => current.getAskStatus(),
+  enrichLead: (id: string) => current.enrichLead(id),
+  enrichLeads: (ids: string[]) => current.enrichLeads(ids),
 }
 
 export async function initDataService(): Promise<'api' | 'local'> {

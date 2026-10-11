@@ -94,4 +94,14 @@ export const apiService: DataService = {
     const response = await http<{ data: AskStatus }>('/ask/status')
     return response.data
   },
+
+  async enrichLead(id: string) {
+    const response = await http<{ data: Lead }>(`/leads/${id}/enrich`, { method: 'POST' })
+    return response.data
+  },
+
+  async enrichLeads(ids: string[]) {
+    const response = await http<{ data: Lead[] }>('/leads/enrich', { method: 'POST', body: { ids } })
+    return response.data
+  },
 }

@@ -38,6 +38,7 @@ export interface Lead {
   completeness: number
   nextAction: string | null
   notes: string | null
+  enrichment?: unknown | null
   breakdown: ScoreBreakdown
   createdAt: string
   updatedAt: string
